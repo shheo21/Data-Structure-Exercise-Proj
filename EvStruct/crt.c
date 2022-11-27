@@ -47,23 +47,44 @@ void makeCont(int year) {
 
 }
 
-void writesch(int yr, int mh, int dd, int sth, int stm, int endh, int endm, char* note) {
+void writesch(ssched sch) {
 	int fd;
 	char* fname = "";
-	sprintf(fname, "%ld;%d;%d;%d;%d:%d~%d:%d", time(NULL), yr, mh, dd, sth, stm, endh, endm);
+	sprintf(fname, "%d;%d;%d;%d:%d~%d:%d", sch.year, sch.month, sch.day, sch.sthour, sch.stmin, sch.endhour, sch.endmin);
 	if ((fd = open(fname, O_RDWR|O_CREAT, FPERMS)) < 0) {
-		perror("Could not write schedule!");
+		perror("Error while writing schedule!");
 		return;
 	}
-	write(fd, note, strlen(note));
+	write(fd, sch.note, strlen(sch.note));
 	close(fd);
 }
 
 ssched readsch(int yr, int mh, int dd, int sth, int stm, int endh, int endm) {
+	int fd;
+	size_t rsize;
 	ssched res;
 	char* schname = "";
+	sprintf(schname, "%d;%d;%d;%d:%d~%d:%d", yr, mh, dd, sth, sth, endh, endm);
+	if ((fd = open(schname, O_RDWR)) < 0) {
+		perror("Error in reading schedule!");
+		memset(&res, 0, sizeof(ssched));
+		return res;
+	}
+	char buf[21];
+	do {
+		memset(buf, 0, sizeof(buf));
+		rsize = read(fd, buf, 1024);
+	} while(rsize > 0);
+	res.year = yr;
+	res.month = mh;
+	res.day = dd;
+	res.sthour = sth;
+	res.stmin = stm;
+	res.endhour = endh;
+	res.endmin = endm;
+	strcpy(res.note, buf);
 
-	
+	return res;
 }
 
 int main(int argc, char *argv[])
