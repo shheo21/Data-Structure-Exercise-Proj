@@ -87,12 +87,30 @@ ssched readsch(int yr, int mh, int dd, int sth, int stm, int endh, int endm) {
 	return res;
 }
 
-int main(int argc, char *argv[])
+int printSched(char* date)
 {
+	char fname[256] = { '\0', };
+	char buf[21] = { '\0', };
+	strcpy(fname, date);
 	DIR* dirp;
 	struct dirent* dentry;
+	dirp = opendir(date);
+	strcat(date, "/");
+	while ((dentry = readdir(dirp)) != NULL)
+	{
+		int fd = open(strcat(fname, dentry->d_name), O_RDONLY);
+		read(fd, buf, sizeof(buf));
+		close(fd);
+
+		printf("%s\n", buf);
+	}
+
+	return 0;
+}
+
+int main(int argc, char *argv[])
+{
 	makeCont(2022);
-	
 
 	return 0;
 }
